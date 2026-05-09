@@ -1,252 +1,416 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1NCOG CHEATS | OFFICIAL STORE</title>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@300;700&display=swap');
-        
-        :root { --cyan: #00f2ff; --bg: #020205; --red: #ff003c; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body { background: var(--bg); color: white; font-family: 'JetBrains Mono', monospace; overflow-x: hidden; }
-        #canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.15; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1NCOG CHEATS | OFFICIAL STORE</title>
 
-        /* CAPA DE AUTENTICACIÓN ESTÉTICA */
-        #auth-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, #050510 0%, #000 100%); z-index: 9999; display: flex; justify-content: center; align-items: center; transition: 0.8s ease; }
-        
-        .login-box { 
-            border: 1px solid rgba(0, 242, 255, 0.3); 
-            padding: 50px 40px; 
-            width: 90%; 
-            max-width: 420px; 
-            text-align: center; 
-            background: rgba(10, 10, 20, 0.95); 
-            box-shadow: 0 0 50px rgba(0, 242, 255, 0.05), inset 0 0 20px rgba(0, 242, 255, 0.02);
-            backdrop-filter: blur(10px);
-            border-radius: 4px;
-        }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=JetBrains+Mono:wght@300;700&display=swap');
 
-        .login-box h2 { font-family: 'Orbitron'; letter-spacing: 5px; color: var(--cyan); margin-bottom: 30px; font-size: 1.5rem; text-shadow: 0 0 15px var(--cyan); }
+:root{
+--cyan:#00f2ff;
+--bg:#020205;
+--red:#ff003c;
+}
 
-        input { 
-            width: 100%; padding: 15px; margin: 12px 0; 
-            background: rgba(0,0,0,0.5); border: 1px solid #1a1a2e; 
-            color: var(--cyan); outline: none; text-align: center; 
-            font-family: 'JetBrains Mono'; transition: 0.3s;
-            border-radius: 2px;
-        }
-        input:focus { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
 
-        .btn-main { 
-            width: 100%; padding: 16px; background: var(--cyan); color: #000; 
-            border: none; font-family: 'Orbitron'; font-weight: 900; 
-            cursor: pointer; text-transform: uppercase; margin-top: 15px; 
-            transition: 0.4s; letter-spacing: 2px;
-        }
-        .btn-main:hover { background: #fff; box-shadow: 0 0 25px var(--cyan); transform: translateY(-2px); }
+body{
+background:var(--bg);
+color:white;
+font-family:'JetBrains Mono', monospace;
+overflow-x:hidden;
+}
 
-        .btn-toggle { 
-            background: transparent; color: rgba(255,255,255,0.5); 
-            border: none; font-size: 11px; margin-top: 25px; 
-            cursor: pointer; font-family: 'Orbitron'; text-decoration: underline;
-            transition: 0.3s;
-        }
-        .btn-toggle:hover { color: var(--cyan); }
+#canvas{
+position:fixed;
+top:0;
+left:0;
+z-index:-1;
+opacity:0.15;
+}
 
-        /* MENSAJE DE ERROR DECORADO */
-        #msg { height: 20px; margin-top: 15px; font-size: 12px; font-weight: bold; font-family: 'Orbitron'; letter-spacing: 1px; transition: 0.3s; }
-        .error-anim { color: var(--red); text-shadow: 0 0 10px var(--red); animation: shake 0.4s; }
+/* TIENDA */
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
+#main-content{
+opacity:1;
+padding-bottom:80px;
+}
 
-        /* CONTENIDO TIENDA */
-        #main-content { display: none; opacity: 0; transition: 1.5s; padding-bottom: 80px; }
-        .header { padding: 80px 20px; text-align: center; }
-        .header h1 { font-family: 'Orbitron'; font-size: clamp(1.8rem, 10vw, 4rem); letter-spacing: 8px; color: #fff; text-shadow: 0 0 30px var(--cyan); }
-        
-        .container { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; padding: 20px; }
-        
-        .card { background: rgba(255,255,255,0.01); border: 1px solid #111; padding: 20px; position: relative; text-align: center; transition: 0.5s; }
-        .card:hover { border-color: var(--cyan); background: rgba(0, 242, 255, 0.02); transform: translateY(-5px); }
-        .card img { width: 100%; height: 250px; object-fit: cover; margin-bottom: 20px; border-radius: 2px; filter: grayscale(30%); transition: 0.5s; }
-        .card:hover img { filter: grayscale(0%); }
-        
-        .price { position: absolute; top: 30px; right: 30px; background: var(--cyan); color: #000; padding: 6px 15px; font-weight: 900; font-family: 'Orbitron'; font-size: 14px; box-shadow: 0 0 15px rgba(0,242,255,0.3); }
+.header{
+padding:80px 20px;
+text-align:center;
+}
 
-        /* MODAL */
-        #buy-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .modal-content { width: 95%; max-width: 550px; background: #05050a; border: 1px solid var(--cyan); padding: 30px; position: relative; }
-        .modal-video { width: 100%; aspect-ratio: 16/9; background: #000; margin: 20px 0; border: 1px solid #1a1a1a; }
-        video { width: 100%; height: 100%; box-shadow: 0 0 20px rgba(0,242,255,0.1); }
-        .close-modal { position: absolute; top: 15px; right: 20px; color: var(--cyan); font-size: 35px; cursor: pointer; opacity: 0.7; transition: 0.3s; }
-        .close-modal:hover { opacity: 1; transform: rotate(90deg); }
+.header h1{
+font-family:'Orbitron';
+font-size:clamp(1.8rem,10vw,4rem);
+letter-spacing:8px;
+color:#fff;
+text-shadow:0 0 30px var(--cyan);
+}
 
-        .seller-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn-v { padding: 18px; border: none; font-family: 'Orbitron'; font-weight: 900; cursor: pointer; color: #fff; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; }
-        .v1 { background: #0055ff; box-shadow: 0 0 15px rgba(0,85,255,0.2); }
-        .v2 { background: #0033aa; box-shadow: 0 0 15px rgba(0,51,170,0.2); }
-        .btn-v:hover { transform: scale(1.05); filter: brightness(1.2); }
-    </style>
+.container{
+max-width:1300px;
+margin:0 auto;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+gap:30px;
+padding:20px;
+}
+
+.card{
+background:rgba(255,255,255,0.01);
+border:1px solid #111;
+padding:20px;
+position:relative;
+text-align:center;
+transition:0.5s;
+}
+
+.card:hover{
+border-color:var(--cyan);
+background:rgba(0,242,255,0.02);
+transform:translateY(-5px);
+}
+
+.card img{
+width:100%;
+height:250px;
+object-fit:cover;
+margin-bottom:20px;
+border-radius:2px;
+filter:grayscale(30%);
+transition:0.5s;
+}
+
+.card:hover img{
+filter:grayscale(0%);
+}
+
+.price{
+position:absolute;
+top:30px;
+right:30px;
+background:var(--cyan);
+color:#000;
+padding:6px 15px;
+font-weight:900;
+font-family:'Orbitron';
+font-size:14px;
+box-shadow:0 0 15px rgba(0,242,255,0.3);
+}
+
+/* MODAL */
+
+#buy-modal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.98);
+z-index:10000;
+justify-content:center;
+align-items:center;
+backdrop-filter:blur(5px);
+}
+
+.modal-content{
+width:95%;
+max-width:550px;
+background:#05050a;
+border:1px solid var(--cyan);
+padding:30px;
+position:relative;
+}
+
+.modal-video{
+width:100%;
+aspect-ratio:16/9;
+background:#000;
+margin:20px 0;
+border:1px solid #1a1a1a;
+}
+
+video{
+width:100%;
+height:100%;
+box-shadow:0 0 20px rgba(0,242,255,0.1);
+}
+
+.close-modal{
+position:absolute;
+top:15px;
+right:20px;
+color:var(--cyan);
+font-size:35px;
+cursor:pointer;
+opacity:0.7;
+transition:0.3s;
+}
+
+.close-modal:hover{
+opacity:1;
+transform:rotate(90deg);
+}
+
+.seller-btns{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+}
+
+.btn-main{
+width:100%;
+padding:16px;
+background:var(--cyan);
+color:#000;
+border:none;
+font-family:'Orbitron';
+font-weight:900;
+cursor:pointer;
+text-transform:uppercase;
+margin-top:15px;
+transition:0.4s;
+letter-spacing:2px;
+}
+
+.btn-main:hover{
+background:#fff;
+box-shadow:0 0 25px var(--cyan);
+transform:translateY(-2px);
+}
+
+.btn-v{
+padding:18px;
+border:none;
+font-family:'Orbitron';
+font-weight:900;
+cursor:pointer;
+color:#fff;
+font-size:11px;
+text-transform:uppercase;
+letter-spacing:1px;
+transition:0.3s;
+}
+
+.v1{
+background:#0055ff;
+}
+
+.v2{
+background:#0033aa;
+}
+
+.btn-v:hover{
+transform:scale(1.05);
+filter:brightness(1.2);
+}
+</style>
 </head>
+
 <body>
-    <canvas id="canvas"></canvas>
 
-    <div id="auth-layer">
-        <div class="login-box">
-            <h2 id="auth-title">INICIAR SESIÓN</h2>
-            <input type="email" id="u-email" placeholder="EMAIL DE USUARIO">
-            <input type="password" id="u-pass" placeholder="CONTRASEÑA">
-            <p id="msg"></p>
-            <button class="btn-main" onclick="handleAuth()" id="btn-text">INGRESAR AL SISTEMA</button>
-            <button class="btn-toggle" onclick="toggleAuth()" id="toggle-text">¿No tienes cuenta? Regístrate aquí</button>
-        </div>
-    </div>
+<canvas id="canvas"></canvas>
 
-    <div id="main-content">
-        <div class="header"><h1>1NCOG CHEATS</h1></div>
-        <div class="container">
-            
-            <div class="card">
-                <div class="price">15 USD</div>
-                <img src="https://i.ibb.co/XkWjjn6w/IMG-20260405-WA0113.jpg"> 
-                <h3>CUBAN MODS</h3>
-                <button class="btn-main" onclick="openBuy('CUBAN MODS', 'https://www.dropbox.com/scl/fi/zxsyq0kd3omd1lvjqcwrn/VID-20260405-WA0104.mp4?rlkey=zybdvxiiv8zkseclw9e2r5f6g&st=3p7td566&raw=1')">ADQUIRIR</button>
-            </div>
+<!-- TIENDA -->
 
-            <div class="card">
-                <div class="price">12 USD</div>
-                <img src="https://i.ibb.co/20pyf21L/IMG-20260403-WA0008.jpg">
-                <h3>HG CHEATS</h3>
-                <button class="btn-main" onclick="openBuy('HG CHEATS', 'https://www.dropbox.com/scl/fi/wu5gk09zyjf64ds92wbg6/VID-20260329-WA0134.mp4?rlkey=whgwvr7tygkmc960cy4145bbw&st=rq4yiead&raw=1')">ADQUIRIR</button>
-            </div>
+<div id="main-content">
 
-            <div class="card">
-                <div class="price">12 USD</div>
-                <img src="https://i.ibb.co/hJCs452T/IMG-20260401-WA0174-1.jpg">
-                <h3>DRIP CLIENT</h3>
-                <button class="btn-main" onclick="openBuy('DRIP CLIENT', 'https://www.dropbox.com/scl/fi/okal3ygsnlln62rivofqp/VID-20260405-WA0070.mp4?rlkey=wua1qz95mhwtf8936srd21iri&st=bckovp86&raw=1')">ADQUIRIR</button>
-            </div>
+<div class="header">
+<h1>1NCOG CHEATS</h1>
+</div>
 
-            <div class="card">
-                <div class="price">10 USD</div>
-                <img src="https://i.ibb.co/MxYZDjCh/IMG-20260404-WA0004.jpg">
-                <h3>REGEDIT EXTREME</h3>
-                <button class="btn-main" onclick="openBuy('REGEDIT EXTREME', 'https://www.dropbox.com/scl/fi/aj3j696kj2fx1ngfcb5nt/VID-20260404-WA0003.mp4?rlkey=vs3447ee46qykn5i8y217u8l3&st=obgeaqcg&raw=1')">ADQUIRIR</button>
-            </div>
+<div class="container">
 
-            <div class="card">
-                <div class="price">15 USD</div>
-                <img src="https://i.ibb.co/60tWnbrL/IMG-20260403-WA0010-1.jpg"> 
-                <h3>PATO TEAM</h3>
-                <button class="btn-main" onclick="openBuy('PATO TEAM', 'https://www.dropbox.com/scl/fi/zmafibbbk7qa51qwvpuin/VID-20260403-WA0006.mp4?rlkey=03l6ziml2h3v1jsu5ph8cot67&st=vsydiful&raw=1')">ADQUIRIR</button>
-            </div>
+<div class="card">
+<div class="price">15 USD</div>
 
-        </div>
-    </div>
+<img src="https://i.ibb.co/XkWjjn6w/IMG-20260405-WA0113.jpg">
 
-    <div id="buy-modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeBuy()">&times;</span>
-            <h2 id="modal-title" style="color: var(--cyan); text-align:center; font-family: Orbitron; letter-spacing: 3px;"></h2>
-            <div class="modal-video"><video id="v-player" controls preload="auto"></video></div>
-            <p style="text-align: center; font-size: 10px; color: #555; margin-bottom: 15px; letter-spacing: 2px;">CONTACTA CON UN VENDEDOR OFICIAL</p>
-            <div class="seller-btns">
-                <button class="btn-v v1" onclick="contact(1)">VENDEDOR #1</button>
-                <button class="btn-v v2" onclick="contact(2)">VENDEDOR #2</button>
-            </div>
-        </div>
-    </div>
+<h3>CUBAN MODS</h3>
 
-    <script>
-        const firebaseConfig = { apiKey: "AIzaSyAPayc7ZASHcRBnQPkFbD5YLYUwcyatc7Y", authDomain: "web-1ncog-shop.firebaseapp.com", projectId: "web-1ncog-shop", appId: "1:834131601106:web:1717b13a1c02e3689c6f0b" };
-        firebase.initializeApp(firebaseConfig);
+<button class="btn-main"
+onclick="openBuy('CUBAN MODS','https://www.dropbox.com/scl/fi/zxsyq0kd3omd1lvjqcwrn/VID-20260405-WA0104.mp4?rlkey=zybdvxiiv8zkseclw9e2r5f6g&st=3p7td566&raw=1')">
+ADQUIRIR
+</button>
+</div>
 
-        let isRegisterMode = false;
+<div class="card">
+<div class="price">12 USD</div>
 
-        function toggleAuth() {
-            isRegisterMode = !isRegisterMode;
-            document.getElementById('auth-title').innerText = isRegisterMode ? "REGISTRARSE" : "INICIAR SESIÓN";
-            document.getElementById('btn-text').innerText = isRegisterMode ? "CREAR CUENTA" : "INGRESAR AL SISTEMA";
-            document.getElementById('toggle-text').innerText = isRegisterMode ? "¿Ya tienes cuenta? Inicia sesión" : "¿No tienes cuenta? Regístrate aquí";
-            document.getElementById('msg').innerText = "";
-        }
+<img src="https://i.ibb.co/20pyf21L/IMG-20260403-WA0008.jpg">
 
-        function handleAuth() {
-            const email = document.getElementById('u-email').value;
-            const pass = document.getElementById('u-pass').value;
-            const msg = document.getElementById('msg');
-            
-            if(!email || !pass) {
-                showError("RELLENA TODOS LOS CAMPOS");
-                return;
-            }
+<h3>HG CHEATS</h3>
 
-            const auth = firebase.auth();
-            const action = isRegisterMode ? auth.createUserWithEmailAndPassword(email, pass) : auth.signInWithEmailAndPassword(email, pass);
+<button class="btn-main"
+onclick="openBuy('HG CHEATS','https://www.dropbox.com/scl/fi/wu5gk09zyjf64ds92wbg6/VID-20260329-WA0134.mp4?rlkey=whgwvr7tygkmc960cy4145bbw&st=rq4yiead&raw=1')">
+ADQUIRIR
+</button>
+</div>
 
-            action.then(() => {
-                document.getElementById('auth-layer').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('auth-layer').style.display = 'none';
-                    const main = document.getElementById('main-content');
-                    main.style.display = 'block';
-                    setTimeout(() => main.style.opacity = '1', 50);
-                }, 800);
-            }).catch(e => {
-                showError("DATOS INCORRECTOS");
-            });
-        }
+<div class="card">
+<div class="price">12 USD</div>
 
-        function showError(text) {
-            const msg = document.getElementById('msg');
-            msg.innerText = text;
-            msg.className = "error-anim";
-            setTimeout(() => msg.className = "", 400);
-        }
+<img src="https://i.ibb.co/hJCs452T/IMG-20260401-WA0174-1.jpg">
 
-        let currentProduct = "";
-        function openBuy(name, vid) {
-            currentProduct = name;
-            document.getElementById('modal-title').innerText = name;
-            const player = document.getElementById('v-player');
-            player.src = vid;
-            player.play();
-            document.getElementById('buy-modal').style.display = 'flex';
-        }
+<h3>DRIP CLIENT</h3>
 
-        function closeBuy() { 
-            document.getElementById('buy-modal').style.display = 'none'; 
-            document.getElementById('v-player').pause(); 
-        }
+<button class="btn-main"
+onclick="openBuy('DRIP CLIENT','https://www.dropbox.com/scl/fi/okal3ygsnlln62rivofqp/VID-20260405-WA0070.mp4?rlkey=wua1qz95mhwtf8936srd21iri&st=bckovp86&raw=1')">
+ADQUIRIR
+</button>
+</div>
 
-        function contact(v) {
-            const num = (v === 1) ? "56920012710" : "66864178102"; 
-            window.open(`https://wa.me/${num}?text=Hola,%20vengo%20de%20la%20tienda%20oficial.%20Quiero%20información%20sobre:%20${currentProduct}`, '_blank');
-        }
+<div class="card">
+<div class="price">10 USD</div>
 
-        // MATRIX BACKGROUND
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const cols = Array(Math.floor(canvas.width/20)).fill(1);
-        function draw() {
-            ctx.fillStyle = "rgba(0,0,0,0.05)"; ctx.fillRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = "#00f2ff"; ctx.font = "15px monospace";
-            cols.forEach((y, i) => {
-                ctx.fillText(Math.floor(Math.random()*2), i*20, y*20);
-                if(y*20 > canvas.height && Math.random() > 0.975) cols[i] = 0;
-                cols[i]++;
-            });
-        }
-        setInterval(draw, 50);
-    </script>
+<img src="https://i.ibb.co/MxYZDjCh/IMG-20260404-WA0004.jpg">
+
+<h3>REGEDIT EXTREME</h3>
+
+<button class="btn-main"
+onclick="openBuy('REGEDIT EXTREME','https://www.dropbox.com/scl/fi/aj3j696kj2fx1ngfcb5nt/VID-20260404-WA0003.mp4?rlkey=vs3447ee46qykn5i8y217u8l3&st=obgeaqcg&raw=1')">
+ADQUIRIR
+</button>
+</div>
+
+<div class="card">
+<div class="price">15 USD</div>
+
+<img src="https://i.ibb.co/60tWnbrL/IMG-20260403-WA0010-1.jpg">
+
+<h3>PATO TEAM</h3>
+
+<button class="btn-main"
+onclick="openBuy('PATO TEAM','https://www.dropbox.com/scl/fi/zmafibbbk7qa51qwvpuin/VID-20260403-WA0006.mp4?rlkey=03l6ziml2h3v1jsu5ph8cot67&st=vsydiful&raw=1')">
+ADQUIRIR
+</button>
+</div>
+
+</div>
+</div>
+
+<!-- MODAL -->
+
+<div id="buy-modal">
+
+<div class="modal-content">
+
+<span class="close-modal" onclick="closeBuy()">
+&times;
+</span>
+
+<h2 id="modal-title"
+style="color:var(--cyan);text-align:center;font-family:Orbitron;letter-spacing:3px;">
+</h2>
+
+<div class="modal-video">
+<video id="v-player" controls preload="auto"></video>
+</div>
+
+<p style="text-align:center;font-size:10px;color:#555;margin-bottom:15px;letter-spacing:2px;">
+CONTACTA CON UN VENDEDOR OFICIAL
+</p>
+
+<div class="seller-btns">
+
+<button class="btn-v v1" onclick="contact(1)">
+VENDEDOR #1
+</button>
+
+<button class="btn-v v2" onclick="contact(2)">
+VENDEDOR #2
+</button>
+
+</div>
+</div>
+</div>
+
+<script>
+
+// MODAL
+
+let currentProduct="";
+
+function openBuy(name,vid){
+
+currentProduct=name;
+
+document.getElementById('modal-title').innerText=name;
+
+const player=document.getElementById('v-player');
+
+player.src=vid;
+
+player.play();
+
+document.getElementById('buy-modal').style.display='flex';
+}
+
+function closeBuy(){
+
+document.getElementById('buy-modal').style.display='none';
+
+document.getElementById('v-player').pause();
+}
+
+function contact(v){
+
+const num=(v===1)
+? "56920012710"
+: "66864178102";
+
+window.open(
+`https://wa.me/${num}?text=Hola,%20vengo%20de%20la%20tienda%20oficial.%20Quiero%20información%20sobre:%20${currentProduct}`,
+'_blank'
+);
+}
+
+// MATRIX EFFECT
+
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+const cols=Array(Math.floor(canvas.width/20)).fill(1);
+
+function draw(){
+
+ctx.fillStyle="rgba(0,0,0,0.05)";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+ctx.fillStyle="#00f2ff";
+ctx.font="15px monospace";
+
+cols.forEach((y,i)=>{
+
+ctx.fillText(
+Math.floor(Math.random()*2),
+i*20,
+y*20
+);
+
+if(y*20>canvas.height && Math.random()>0.975){
+cols[i]=0;
+}
+
+cols[i]++;
+});
+}
+
+setInterval(draw,50);
+
+</script>
+
 </body>
 </html>
